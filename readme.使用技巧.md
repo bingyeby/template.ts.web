@@ -1,0 +1,108 @@
+### 如何为自己的ts文件生成声明文件
+
+　　同前，tsc编译程序可以生成声明文件，只需要参数-d/--declaration 及ts文件即可。
+
+　　例如：tsc -d main.ts
+
+
+### 拿不到声明如何解决
+    declare var swal: (arg: any) => any;
+    有swal这样一个函数并没有提供ts声明，这样就可以自由使用了。
+
+    ts里HTMLElement.remove这个成员是不存在的，只能用它父对象的removeChild，这样不是很方便。
+
+　　dom:HTMLElement;
+
+　　(<any>dom).remove();// 就这样勉强的转为any再调用remove吧。
+
+### 数组的几种定义方法
+    类型 + 方括号
+    let fibonacci: number[] = [1, 1, 2, 3, 5];
+
+    数组泛型
+    let fibonacci: Array<number> = [1, 1, 2, 3, 5];
+
+    接口表示数组
+    interface NumberArray {
+        [index: number]: number;
+    }
+    let fibonacci: NumberArray = [1, 1, 2, 3, 5];
+
+    any 在数组中的应用
+    let list: any[] = ['str', 123, { website: 'str' }];
+
+### 应用技巧
+    https://www.cnblogs.com/Ambre/p/7940761.html
+    TypeScript入门，使用TypeScript编写第三方控件的方式！
+
+    https://www.jianshu.com/p/b6579158b98f
+    TypeScript用法小结（基础部分）
+
+
+### 巧用联合类型
+    如何写一个，Color 要么是 red 颜色，要么是 yellow 颜色。
+        不推荐 -->
+        interface Color {
+            red?: string,
+            yellow?: string,
+        }
+
+        推荐 -->
+        type Color = { red: string, } | { yellow: string, }
+
+    interface Color 可以理解为在 Color 中既有 red 也有 yellow 两个非必须存在的属性。而 type Color 才是如题意。
+
+
+### keyof的使用
+    keyof 与 Object.keys 略有相似，只不过 keyof 取 interface 的键。
+
+    使用 typescript 实现一个 get 函数来获取它的属性值
+```ts
+const data = {
+  a: 3,
+  hello: 'world'
+}
+
+function get(o: object, name: string) {
+  return o[name]
+}
+```
+    实现缺点：
+    1、函数无法确认返回类型: ts 最大的优点是类型校验。
+    2、无法对  key 做约束： 可能会犯拼写的错误。
+
+
+    使用 keyof 来增强一下 get 函数的类型功能
+    function get<T extends object, K extends keyof T>(o: T, name: K): T[K] {
+        return o[name]
+    }
+    get(data, 'a')
+
+
+### for...in 和 for...of
+    迭代器和生成器
+    for...in 输出的是key值
+    for...of 输出的是value值
+
+### 使用.d.ts文件
+    既然要开发一个项目，显然不会只有这些代码。肯定要用到内建模块和第三方模块。然而，直接导入模块，在.ts文件中是不行的。
+
+    由于typescript自身的机制，需要一份xx.d.ts声明文件，来说明模块对外公开的方法和属性的类型以及内容。感觉有一些麻烦。好在，官方以及社区已经准备好了方案，来解决这个问题。
+
+    在TypeScript 2.0以上的版本，获取类型声明文件只需要使用npm。在项目目录下执行安装:
+
+    npm install @types/node
+
+    就可以获得有关node.js v6.x的API的类型说明文件。之后，就可以顺利的导入需要的模块了:
+
+    import * as http from 'http';
+
+    完成之后，不仅可以正常的使用http模块中的方法，也可以在vscode中获得相应的代码提示。
+
+    对于内建模块，安装一个@types/node模块可以整体解决模块的声明文件问题。那么，对于浩如烟海的第三方模块，该怎么办呢？官方和社区中也提供了查找和安装的渠道：
+        typings
+        DefinitelyTyped
+        TypeSearch
+
+### any 检测关闭
+    'this' implicitly has type 'any' because it does not have a type annotation.

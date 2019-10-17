@@ -1,0 +1,324 @@
+
+## typescript总括
+### 类型
+#### 8种数据类型
+    number string boolean 
+    array object 
+    null undefined
+    symbol
+
+    let num:number = 111;
+    let arr:number[] = [1,2,3];
+    let brr:Array<number> = [1,2,3];
+
+    let obj: object;
+    obj = { name: 'test' }
+    obj = 111 // error 不能将类型“123”分配给类型“object”
+    console.log(obj.name) // error 类型“object”上不存在属性“name”
+
+    当你希望一个值必须是对象而不是数值等类型时，比如我们定义一个函数，参数必须是对象，这个时候就用到object类型了
+
+#### TS 中补充的6个类型
+    元组tuple 枚举enum
+    any void never unknown
+
+    tuple 元组
+        let tuple: [string, number, boolean];
+        tuple = ["a", 2, false];     
+
+        // enum 枚举
+        enum duke{ name, age }
+        console.log(duke.name,duke.age);    // 0 1
+
+        enum duke{ name=9, age=9 } // 默认递增
+        console.log(duke.name,duke.age,duke[9]);    // 9 9 "age"
+
+        enum Roles { SUPER_ADMIN = 0, ADMIN = 3, USER = 7 }
+        Roles.SUPER_ADMIN; // 0
+        Roles[3] // 'ADMIN'
+        // 1. 如果某个字段使用了计算值或常量，那么该字段后面紧接着的字段必须设置初始值
+        // 2. TS 中定义的枚举，在编译后其实是对象 {SUPER_ADMIN:1, 1:'SUPER_ADMIN'}
+
+    any 任意类型
+        let value: any;
+        value = 123;
+        value = "abc";
+        value = false;
+
+        const array: any[] = [1, "a", true];
+
+    viod 无类型 
+        void 和 any 相反，表示没有任意类型，就是什么类型都不是，这在我们定义函数，函数没有返回值时会用到
+        const consoleText = (text: string): void => {
+            console.log(text);
+        };
+
+
+    never 类型
+        指那些永不存在的值的类型，它是那些总会抛出异常或根本不会有返回值的函数表达式的返回值类型，当变量被永不为真的类型保护所约束时，该变量也是 never 类型
+        never 类型是任何类型的子类型，所以它可以赋值给任何类型；而没有类型是 never 的子类型，所以除了它自身没有任何类型可以赋值给 never 类型，any 类型也不能赋值给 never 类型
+
+        const errorFunc = (message:string):never=>{
+            throw new Error(message);
+        }
+        const infiniteFunc = ():never=>{
+            while(true){}
+        }        
+
+
+    unknown 未知类型
+        unknown 相对于 any 是安全的，当你指定值为 unknown 类型的时候，如果没有通过基于控制流的类型断言来缩小范围的话，是不能对他进行任何操作的，unknown 类型的值不是可以随意操作的
+        unknown 类型只能被赋值给 any 类型和 unknown 类型本身
+
+
+
+#### 交叉类型
+    交叉类型就是取多个类型的并集，使用&符号定义，被&链接的过个类型构成一个交叉类型，表示这个类型同时具备这几个连接起来的类型的特点
+```js
+const merge=<T,U>(arg1:T,arg2:U):T & U =>{
+    // 这里指定返回值的类型兼备T和U两个类型变量代表的类型的特点;
+    let res = <T & U>{};
+    // 这里使用Object.assign方法，返回一个合并后的对象；
+    res = Object.assign(arg1,arg2);
+    return res;
+}
+const info1 = { name:"duke" }
+const info2 = { age:18 }
+const info = merge(info1,info2);
+```
+
+#### 联合类型
+    联合类型实际是几个类型的结合，但是和交叉类型不同，联合类型是要求只要符合联合类型中任意一种类型即可，它使用|符号定义。
+    当我们的程序具有多样性，元素类型不唯一时，即使用联合类型
+```js
+const getLength=(content:string|number):number=>{
+    if(typeof content === "string"){ return content.length }else{ return content.toString().length; }
+}
+console.log(getLength("abc"))//3
+console.log(getLength(123))//3
+```
+
+### 接口
+#### 接口的定义
+{}括号包裹的是一个代码块，里面是一条条声明语句，只不过声明的不是变量的值而是类型。每条声明之前用换行分隔即可，或者也可以使用分号或者逗号。
+
+```js
+// 1. 接口描述普通对象
+interface Info{
+    lastName:string;
+    cards: number[];
+    color?:string; // 可选属性，属性名后面加个?，代表非必须
+    readonly name: string; // 要保证对象的属性值不可修改，需要使用 readonly
+
+    
+    [id: number]: string; // 任意属性 [一旦定义了任意属性，那么确定属性和可选属性都必须是它的子属性]
+    (): void; // 这里定义Counter这个结构必须包含一个函数，函数的要求是无参数，返回值为void，即无返回值
+    (str:string):string;// 函数一个字符串参数，返回字符串
+}
+const getFullName = ({ firstName, lastName }: Info) => {
+    return `${firstName} ${lastName}`;
+}
+
+// 2. 接口描述函数，使用接口的方式来定义一个函数需要符合的形状
+interface AddFunc {
+  (num1: number, num2: number): number;
+}
+const add: AddFunc = (n1, n2) => n1 + n2;
+```
+
+#### 接口的继承
+1. 一个接口被多个接口所继承
+2. 一个接口同时继承多个接口
+3. 在3.1版本，TS 支持直接给函数添加属性。
+
+#### 类与接口
+* 基础使用
+```ts
+interface Alarm {
+  alert();
+}
+
+class Door {
+}
+
+class SecurityDoor extends Door implements Alarm {
+  alert() {
+    console.log('SecurityDoor alert');
+  }
+}
+
+class Car implements Alarm {
+  alert() {
+    console.log('Car alert');
+  }
+}
+```
+* 一个类可以实现多个接口
+```ts
+interface Alarm {
+  alert();
+}
+
+interface Light {
+  lightOn();
+  lightOff();
+}
+
+class Car implements Alarm, Light {
+  alert() {
+    console.log('Car alert');
+  }
+  lightOn() {
+    console.log('Car light on');
+  }
+  lightOff() {
+    console.log('Car light off');
+  }
+}
+```
+
+* 接口可以继承接口
+* 接口可以继承类
+
+
+
+#### 多余属性检测
+1. 多余属性检测，定义的变量比接口少或者多是不允许的
+   1. TSLint 会报一个警告，告诉我们属性名没有按开头字母顺序排列属性列表，
+   2. 在 tslint.json 的 rules 里添加" object-literal-sort-keys":[false]来关闭
+2. 绕开多余属性检查
+   1. 使用类型断言
+        interface Vegetables {
+            color?: string;
+            type: string;
+        }
+        const getVegetables = ({ color, type }: Vegetables) => {
+            return `A ${color ? color + " " : ""}${type}`;
+        };
+        getVegetables({
+            type: "tomato",
+            size: 12,
+            price: 1.2
+        } as Vegetables);
+
+   2. 添加索引签名
+         interface Vegetables {
+           color: string;
+           type: string;
+           [prop: string]: any;
+         }
+         const getVegetables = ({ color, type }: Vegetables) => {
+           return `A ${color ? color + " " : ""}${type}`;
+         };
+         getVegetables({
+           color: "red",
+           type: "tomato",
+           size: 12,
+           price: 1.2
+         });
+
+   3. 利用类型兼容性
+        interface Vegetables {
+            type: string;
+        }
+        const getVegetables = ({ type }: Vegetables) => {
+            return `A ${type}`;
+        };
+
+        const option = { type: "tomato", size: 12 };
+        getVegetables(option);
+
+        将对象字面量赋给一个变量option，然后getVegetables传入option，这时没有报错。是因为直接将对象字面量传入函数，和先赋给变量再将变量传入函数，这两种检查机制是不一样的，后者是因为类型兼容性。简单地来说：如果 b 要赋值给 a，那要求 b 至少需要与 a 有相同的属性，多了无所谓。
+
+### 为函数和函数参数定义类型
+1. 为函数定义类型
+```js
+//参数类型为 string，返回值类型为 number
+const getLength = (str:string):number => str.length;
+console.log(getLength("duke"));//4
+```
+
+2. 使用接口定义函数类型
+```js
+interface compute{
+    (str:string):numbers;
+}
+const getLength:compute= str => str.length;
+```
+3. 类型别名来定义函数类型
+```js
+type Add = (x:number,y:number) => number;
+let add1:Add = (arg1:number,arg2:number):number => arg1 + arg2;
+```
+
+4. 参数
+    可选参数
+       type Add=(y:number,x?:number)=>number; // 可选参数位于必选参数之后
+    默认参数
+       const add=(x:number,y:number=2)=>{ return x+y; }
+    剩余参数
+        const handleData=(arg1:number,...args:number[])=>{ console.log(args)}
+        handleData(1,2,3,4); // [2, 3, 4]
+
+5. 函数重载
+    函数重载是指定义几个函数名相同，但是参数个数或类型不同的函数，在调用时传入不同的参数，编译器会自动调用适合的函数。
+    JS 作为一个动态语言是没有函数重载的，只能我们自己在函数体内通过判断参数的个数、类型来指定不同的处理逻辑。
+    在 TS 中有函数重载的概念，但并不是定义几个同名实体函数，然后根据不同的参数格式或类型来自动调用相应的函数。
+    TS 的函数重载是在类型系统层面的，是为了更好地进行类型推断。TS 的函数重载通过为一个函数指定多个函数类型定义，从而对函数调用的返回值进行检查。
+
+```ts
+function handleData(x: string): string[]; // 这个是重载的一部分，指定当参数类型为string时，返回值为string类型的元素构成的数组
+function handleData(x: number): string; // 这个也是重载的一部分，指定当参数类型为number时，返回值类型为string
+
+function handleData(x: any): any { // 这个就是重载的内容了，他是实体函数，不算做重载的部分
+  if (typeof x === "string") {
+    return x.split("");
+  } else {
+    return x
+      .toString()
+      .split("")
+      .join("_");
+  }
+}
+handleData("abc").join("_");
+handleData(123).join("_"); // error 类型"string"上不存在属性"join"
+handleData(false); // error 类型"boolean"的参数不能赋给类型"number"的参数。
+```
+
+
+### 类型断言
+* if ((<string>something).length){}
+* if ((something as string).length) {}
+
+```ts
+function getLength(something: string | number): number {
+    if ((<string>something).length) { // 使用类型断言，将 something 断言成 string
+        return (<string>something).length;
+    } else {
+        return something.toString().length;
+    }
+}
+
+function getLength(something: string | number): number {
+    if ((something as string).length) { // 使用类型断言，将 something 断言成 string
+        return (something as string).length;
+    } else {
+        return something.toString().length;
+    }
+}
+
+// 类型断言不是类型转换，断言成一个联合类型中不存在的类型是不允许的:
+function toBoolean(something: string | number): boolean {
+    return <boolean>something;
+}
+// index.ts(2,10): error TS2352: Type 'string | number' cannot be converted to type 'boolean'.
+//   Type 'number' is not comparable to type 'boolean'.
+```
+
+
+### 类型推断
+TypeScript里，在有些没有明确指出类型的地方，类型推论会帮助提供类型。大多数情况下，类型推论是直截了当地。
+```ts
+let x = 3;
+x = '222' // error: 不能将类型“"222"”分配给类型“number”。
+```
