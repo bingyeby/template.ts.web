@@ -1,17 +1,18 @@
 import { create } from '../utils/core';
 
-///input
+// Input
 export class Input<T extends InputOption>{
-    private thatOption: T;
+    private domOption: T;
+
     //构造函数
     constructor(inputOption: T) {
-        this.thatOption = inputOption;
+        this.domOption = inputOption;
     }
 
     //渲染方法
     render(ele: any) {
-        console.log(this.thatOption)
-        const { label, placeholder, extra, value, click } = this.thatOption;
+        console.log(this.domOption)
+        const { label, placeholder, extra, value, click } = this.domOption;
         const dom: any = create('div', { class: 'xui-input' }, [
             create('label', { type: 'text', onclick: click }, [label]),
             create('input', { placeholder, value }, []),
@@ -22,7 +23,7 @@ export class Input<T extends InputOption>{
     }
 }
 
-///配置项的接口
+// 配置项的接口
 export interface InputOption {
     label?: string,
     placeholder?: string,

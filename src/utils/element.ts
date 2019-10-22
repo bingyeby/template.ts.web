@@ -22,9 +22,7 @@ export default class mElement {
         this.tagName = tagName
         this.props = props || {}
         this.children = children || []
-        this.key = props
-            ? props.key
-            : void 666
+        this.key = props ? props.key : void 1
 
         var count = 0
 

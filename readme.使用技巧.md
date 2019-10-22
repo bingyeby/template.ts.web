@@ -1,3 +1,11 @@
+
+### TS
+    https://juejin.im/post/5d0259f2518825405d15ae62#heading-22
+    Vue3.0 前的 TypeScript 最佳入门实践
+
+    https://github.com/joye61/typescript-tutorial
+    TypeScript速成教程（2小时速成）
+
 ### 如何为自己的ts文件生成声明文件
 
 　　同前，tsc编译程序可以生成声明文件，只需要参数-d/--declaration 及ts文件即可。
@@ -106,3 +114,4 @@ function get(o: object, name: string) {
 
 ### any 检测关闭
     'this' implicitly has type 'any' because it does not have a type annotation.
+    noImplicitThis
