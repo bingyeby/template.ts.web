@@ -63,3 +63,7 @@
     npm i jquery
     npm i @types/jquery
 
+### ts知识
+* [基础知识](./README/1.基础知识.md)
+* [使用技巧](./README/9.使用技巧.md)
+    
