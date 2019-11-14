@@ -2,6 +2,7 @@
   "name": "ts.web.template",
   "version": "1.0.0",
   "description": "web端开发 ts使用样例",
+  "homepage": "https://bingyeby.github.io/template.ts.web",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
