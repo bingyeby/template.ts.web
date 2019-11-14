@@ -1,5 +1,6 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const {CleanWebpackPlugin} = require("clean-webpack-plugin");
+const path = require('path');
 
 module.exports = {
   // 指定入口文件
@@ -7,7 +8,8 @@ module.exports = {
   entry: "./src/index.ts",
   // 指定输出文件名
   output: {
-    filename: "index.js"
+    filename: "index.js",
+	path:path.resolve(__dirname,'./build') //指定生成的文件目录
   },
   resolve: {
     // 自动解析一下拓展，当我们要引入src/index.ts的时候，只需要写src/index即可
@@ -30,7 +32,7 @@ module.exports = {
   devtool: process.env.NODE_ENV === "production" ? false : "inline-source-map",
   // 这里使用webpack-dev-server，进行本地开发调试
   devServer: {
-    contentBase: "./dist",
+    contentBase: "./build",
     stats: "errors-only",
     compress: false,
     host: "localhost",
@@ -41,7 +43,7 @@ module.exports = {
   plugins: [
     // 这里在编译之前先删除dist文件夹
     new CleanWebpackPlugin({
-      cleanOnceBeforeBuildPatterns: ["./dist"]
+      cleanOnceBeforeBuildPatterns: ["./build"]
     }),
     // 这里我们指定编译需要用模板，模板文件是./src/template/index.html，所以接下来我们要创建一个index.html文件
     new HtmlWebpackPlugin({
